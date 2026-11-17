@@ -38,12 +38,9 @@ repos:
     hooks:
       - id: pretty-format-toml
         args: [--autofix, --trailing-commas, --no-sort]
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
-    hooks:
-      - id: yamlfmt
+      - id: pretty-format-yaml
         # ruamel.yaml doesn't line wrap correctly (?) so set width to 1M to avoid issues
-        args: [--mapping=2, --offset=2, --sequence=4, --width=1000000, --implicit_start]
+        args: [--autofix, --indent, '2', --offset, '2', --line-width, '1000000']
   - repo: meta
     # see https://pre-commit.com/#meta-hooks
     hooks:
