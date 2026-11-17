@@ -357,9 +357,9 @@ def prepare_error_information(error, solver_name) -> ErrorInformation:
         PackagesNotFoundError,
     ):
         entries = ensure_tuple(error.entries)
-        error_info["entries"] = set(
+        error_info["entries"] = {
             tuple(map(MatchSpec, ensure_tuple(entry))) for entry in entries
-        )
+        }
         assert len(entries) == len(error_info["entries"])
         if exception_class == UnsatisfiableError:
             error_info["message_excludes"] = resolve_message_fragments(
@@ -406,8 +406,8 @@ class TestBasic:
     def test_solve(self, env, tmpdir, solver_backend, test, channel_server):
         with self._setup_solver(solver_backend, channel_server, tmpdir, test.input) as (
             solver,
-            solver_input,
-            env,
+            _solver_input,
+            _env,
             flags,
         ):
             final_state = solver.solve_final_state(**flags)
@@ -492,8 +492,8 @@ class TestBasic:
             test.input,
         ) as (
             solver,
-            solver_input,
-            env,
+            _solver_input,
+            _env,
             flags,
         ):
             unlink_precs, link_precs = solver.solve_for_diff(**flags)
@@ -512,10 +512,8 @@ class TestBasic:
             test.output.link_precs,
             passthrough_prefixes,
         )
-        assert sorted(list(convert_to_dist_str(unlink_precs))) == sorted(
-            list(unlink_ref)
-        )
-        assert sorted(list(convert_to_dist_str(link_precs))) == sorted(list(link_ref))
+        assert sorted(convert_to_dist_str(unlink_precs)) == sorted(unlink_ref)
+        assert sorted(convert_to_dist_str(link_precs)) == sorted(link_ref)
         if test.output.ordered:
             assert list(convert_to_dist_str(unlink_precs)) == list(unlink_ref)
             assert list(convert_to_dist_str(link_precs)) == list(link_ref)
@@ -532,7 +530,7 @@ class TestBasic:
         with self._setup_solver(solver_backend, channel_server, tmpdir, test.input) as (
             solver,
             solver_input,
-            env,
+            _env,
             flags,
         ):
             unlink_precs, link_precs = solver.solve_for_diff(**flags)
@@ -570,8 +568,8 @@ class TestBasic:
         ) as (
             solver,
             solver_input,
-            env,
-            flags,
+            _env,
+            _flags,
         ):
             constrictions = solver.determine_constricting_specs(
                 solver_input["specs_to_add"][0], solution_precs
@@ -589,8 +587,8 @@ class TestBasic:
         with (
             self._setup_solver(solver_backend, channel_server, tmpdir, test.input) as (
                 solver,
-                solver_input,
-                env,
+                _solver_input,
+                _env,
                 flags,
             ),
             pytest.raises(
@@ -642,7 +640,7 @@ class TestBasic:
                 # classic solver only. bad_deps is a flat tuple of MatchSpecs, wrapped
                 # here to match the set-of-tuples structure in error_info["entries"]
                 if entries := error_info.get("entries"):
-                    assert set((exc.bad_deps,)) == set(entries)
+                    assert {exc.bad_deps} == set(entries)
             case PackagesNotFoundError() as exc:
                 if entries := error_info.get("entries"):
                     expected_names = {
@@ -665,10 +663,10 @@ class TestBasic:
                 )
 
         for fragment in error_info.get("message_excludes", ()):
-            assert fragment not in str(
-                exc_info.value
-            ), f"Fragment {fragment!r} must not appear in the error message"
+            assert fragment not in str(exc_info.value), (
+                f"Fragment {fragment!r} must not appear in the error message"
+            )
         for fragment in error_info.get("message_includes", ()):
-            assert fragment in str(
-                exc_info.value
-            ), f"Fragment {fragment!r} must appear in the error message"
+            assert fragment in str(exc_info.value), (
+                f"Fragment {fragment!r} must appear in the error message"
+            )

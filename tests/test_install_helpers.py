@@ -12,6 +12,8 @@ from conda.models.records import PrefixRecord as CondaPrefixRecord
 
 from pytest_conda_solvers.base_tests.install import (
     TestBasic as _TestBasic,
+)
+from pytest_conda_solvers.base_tests.install import (
     add_base_url,
     get_solver,
     prepare_error_information,
@@ -22,9 +24,13 @@ from pytest_conda_solvers.models import (
     PrefixRecord,
     ResolvePackageNotFoundTestError,
     SpecsConfigurationConflictTestError,
-    TestInput as _TestInput,
-    TestModule as _TestModule,
     UnsatisfiableTestError,
+)
+from pytest_conda_solvers.models import (
+    TestInput as _TestInput,
+)
+from pytest_conda_solvers.models import (
+    TestModule as _TestModule,
 )
 from pytest_conda_solvers.paths import solver_tests_path
 

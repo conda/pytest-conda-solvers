@@ -42,8 +42,10 @@ def generate_table(results: list[dict], target: str) -> str:
     ]
     if n_unchanged:
         lines += [
-            f"_{n_unchanged} test(s) had only their commit SHA bumped "
-            f"and the AST remains unchanged. They are not listed below._",
+            (
+                f"_{n_unchanged} test(s) had only their commit SHA bumped "
+                f"and the AST remains unchanged. They are not listed below._"
+            ),
             "",
         ]
     for yaml_file in sorted(source_data):

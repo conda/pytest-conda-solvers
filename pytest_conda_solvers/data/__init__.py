@@ -1,9 +1,7 @@
 import json
-from functools import lru_cache
-from pathlib import Path
-
+from functools import cache
 from importlib.resources import files
-
+from pathlib import Path
 
 # This package contains datafiles converted from the original index*.json files with
 # jq '.|to_entries|map(select((.value.subdir=="noarch" or (.value | has("noarch")))))|from_entries' index4.json >channel-4_noarch.json
@@ -45,7 +43,7 @@ SUBDIR_MAP = {
 }
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_channel_repodata(channel_name, subdir, filename, add_pip=False):
     # This currently does not offer the merge_noarch option
     assert filename in ("repodata.json", "current_repodata.json")
