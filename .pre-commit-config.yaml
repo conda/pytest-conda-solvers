@@ -8,7 +8,7 @@ ci:
 repos:
   # generic verification and formatting
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       # standard end of line/end of file cleanup
       - id: mixed-line-ending
@@ -21,26 +21,34 @@ repos:
       - id: check-merge-conflict
   # Python verification and formatting
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: dda8db18cfc68df532abf33b185ecd12d5b7b326  # frozen: 1.20.0
+    rev: dda8db18cfc68df532abf33b185ecd12d5b7b326 # frozen: 1.20.0
     hooks:
       # auto format Python codes within docstrings
       - id: blacken-docs
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: ef6cf06c079dd6b299dfc720b0f14400c9d168e1  # frozen: v0.17.5
+  - repo: https://github.com/conda-incubator/pre-commit-mirrors-ruff
+    rev: ef8da846457ee2fcd3fa77979db3787e1279bfe3 # frozen: 0.17.1
     hooks:
       # lint & attempt to correct failures (e.g. pyupgrade)
-      - id: ruff
-        args: [--fix]
+      - id: ruff-conda
       # compatible replacement for black
-      - id: ruff-format
+      - id: ruff-format-conda
+  - repo: https://github.com/conda-incubator/pre-commit-mirrors-prettier
+    rev: 24c47c999b0f35f38084bf4967a1f697f834bf16 # frozen: 3.9.6
+    hooks:
+      - id: prettier-conda
+        types_or: [yaml]
+        args:
+          - --write
+          - --list-different
+          - --ignore-unknown
+          - --single-quote
+          - --end-of-line
+          - auto
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: 4380fbb73a154b5f5624794c1c78d9719ccc860f  # frozen: v2.16.0
+    rev: 4380fbb73a154b5f5624794c1c78d9719ccc860f # frozen: v2.16.0
     hooks:
       - id: pretty-format-toml
         args: [--autofix, --trailing-commas, --no-sort]
-      - id: pretty-format-yaml
-        # ruamel.yaml doesn't line wrap correctly (?) so set width to 1M to avoid issues
-        args: [--autofix, --indent, '2', --offset, '2', --line-width, '1000000']
   - repo: meta
     # see https://pre-commit.com/#meta-hooks
     hooks:
