@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal, TypeAlias
 
-from conda.core.solve import UpdateModifier, DepsModifier
+from conda.core.solve import DepsModifier, UpdateModifier
 from conda.models.enums import PackageType
 from conda.models.match_spec import MatchSpec
 from msgspec import Struct, field

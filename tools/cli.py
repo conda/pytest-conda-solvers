@@ -62,7 +62,7 @@ def generate_schemas(
     if check:
         if output is None:
             raise typer.BadParameter("--check requires --output to be set")
-        current = output.read_text() if output.exists() else None
+        current = output.read_text(encoding="utf-8") if output.exists() else None
         if current != file_representation:
             typer.echo(
                 f"{output} is out of date with the schema generated from "
@@ -76,7 +76,7 @@ def generate_schemas(
     if output is None:
         print(representation)
     else:
-        output.write_text(file_representation)
+        output.write_text(file_representation, encoding="utf-8")
 
 
 def _load_fixture_specs(fixtures_dir: Path) -> dict[str, object]:

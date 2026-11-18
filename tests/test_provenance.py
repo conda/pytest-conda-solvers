@@ -80,9 +80,9 @@ class TestProvenanceFormat:
     def test_url_contains_commit(self, test_entry):
         """The URL must embed the same commit SHA as the provenance.commit field."""
         _, test = test_entry
-        assert (
-            test.provenance.commit in test.provenance.url
-        ), f"Commit {test.provenance.commit} not found in URL {test.provenance.url}"
+        assert test.provenance.commit in test.provenance.url, (
+            f"Commit {test.provenance.commit} not found in URL {test.provenance.url}"
+        )
 
     def test_url_file_path_matches_node_id(self, test_entry):
         """The file path in the URL must match the file path in node_id (before ::)."""
@@ -90,17 +90,17 @@ class TestProvenanceFormat:
         node_file = test.provenance.node_id.split("::")[0]
         m = URL_PATTERN.match(test.provenance.url)
         assert m, f"URL does not match expected pattern: {test.provenance.url}"
-        assert (
-            m.group("path") == node_file
-        ), f"URL path {m.group('path')!r} != node_id path {node_file!r}"
+        assert m.group("path") == node_file, (
+            f"URL path {m.group('path')!r} != node_id path {node_file!r}"
+        )
 
     def test_url_has_line_range(self, test_entry):
         _, test = test_entry
         m = URL_PATTERN.match(test.provenance.url)
         assert m, f"URL does not match expected pattern: {test.provenance.url}"
-        assert m.group("start") and m.group(
-            "end"
-        ), f"URL missing line range fragment: {test.provenance.url}"
+        assert m.group("start") and m.group("end"), (
+            f"URL missing line range fragment: {test.provenance.url}"
+        )
         start, end = int(m.group("start")), int(m.group("end"))
         assert start < end, f"Line range L{start}-L{end} is invalid (start >= end)"
 
@@ -108,12 +108,12 @@ class TestProvenanceFormat:
         """The URL must be a valid GitHub blob permalink with full SHA."""
         _, test = test_entry
         m = URL_PATTERN.match(test.provenance.url)
-        assert (
-            m
-        ), f"URL does not match expected GitHub blob pattern: {test.provenance.url}"
-        assert (
-            len(m.group("commit")) == 40
-        ), f"Commit in URL should be a full 40-char SHA, got {m.group('commit')!r}"
+        assert m, (
+            f"URL does not match expected GitHub blob pattern: {test.provenance.url}"
+        )
+        assert len(m.group("commit")) == 40, (
+            f"Commit in URL should be a full 40-char SHA, got {m.group('commit')!r}"
+        )
 
 
 class TestProvenanceUniqueness:
@@ -122,9 +122,9 @@ class TestProvenanceUniqueness:
         seen = {}
         for yaml_file, test in ALL_TESTS:
             key = test.id
-            assert (
-                key not in seen
-            ), f"Duplicate test ID {key!r}: first in {seen[key]}, also in {yaml_file}"
+            assert key not in seen, (
+                f"Duplicate test ID {key!r}: first in {seen[key]}, also in {yaml_file}"
+            )
             seen[key] = yaml_file
 
     def test_no_duplicate_names(self):
@@ -151,7 +151,7 @@ class TestProvenanceSource:
         filepath = test.provenance.node_id.split("::")[0]
         try:
             source = _fetch_source(test.provenance.commit, filepath)
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             pytest.fail(
                 f"Cannot fetch {filepath} at commit {test.provenance.commit}: {exc}"
             )

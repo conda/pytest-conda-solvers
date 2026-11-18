@@ -26,8 +26,8 @@ import argparse
 import ast
 import asyncio
 import functools
+import io
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -56,11 +56,15 @@ def _gh_token() -> str | None:
         return None
     try:
         result = subprocess.run(
-            ["gh", "auth", "token"], capture_output=True, text=True, timeout=5
+            ["gh", "auth", "token"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         token = result.stdout.strip()
         return token if token else None
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         return None
 
 
@@ -267,7 +271,7 @@ async def main() -> None:
 
     if args.json:
         _real_stdout = sys.stdout
-        sys.stdout = open(os.devnull, "w")
+        sys.stdout = io.StringIO()
 
     print(f"Target commit: {args.commit}")
     if args.dry_run:

@@ -233,7 +233,7 @@ class TestSolveRegressions:
                 solver.solve_final_state()
                 ssc = solver.ssc
                 # Check the cuda virtual package is included in the solver
-                assert "__cuda" in ssc.specs_map.keys()
+                assert "__cuda" in ssc.specs_map
 
                 # Check that the environment is consistent after installing a
                 # package which depends on a virtual package
@@ -262,8 +262,7 @@ class TestSolveRegressions:
         solver_name = request.config.option.conda_solver
         if solver_name != "classic":
             pytest.skip(
-                f"conda-{solver_name}-solver does not use a Solver._r "
-                "(Resolve) object"
+                f"conda-{solver_name}-solver does not use a Solver._r (Resolve) object"
             )
 
         channels = ("channel-1",)
@@ -414,13 +413,15 @@ class TestSolveRegressions:
         in conda-solver-tests/basic.yaml.
         """
         specs = (MatchSpec("accelerate=*=np17*"), MatchSpec("accelerate=*=np16*"))
-        with pytest.raises(ValueError):
-            with get_solver(
+        with (
+            pytest.raises(ValueError),
+            get_solver(
                 solver_backend,
                 tmpdir,
                 channel_server,
                 ("channel-1",),
                 ("linux-64", "noarch"),
                 specs_to_add=specs,
-            ) as solver:
-                solver.solve_final_state()
+            ) as solver,
+        ):
+            solver.solve_final_state()
