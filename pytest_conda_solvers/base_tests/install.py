@@ -604,12 +604,7 @@ class TestBasic:
             channel_server,
             tmpdir,
             test.input,
-        ) as (
-            solver,
-            solver_input,
-            env,
-            flags,
-        ):
+        ) as (solver, *_):
             constrained = solver.get_constrained_packages(
                 as_pairs(test.input.pre_packages),
                 as_pairs(test.input.post_packages),
