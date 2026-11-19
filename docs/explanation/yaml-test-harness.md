@@ -50,11 +50,12 @@ an unknown field inside an entry raises a decode error during collection.
 The top-level `TestModule` still accepts extra fields. See the
 [test schema](../reference/test-schema) for the fields each model accepts.
 
-Each YAML entry exposes all four methods on `TestBasic`. Only the method
-matching its `test_function` is parametrized. The plugin deselects the other
-three methods before the run, so only the method bound to that YAML entry
-remains selected. This also explains the deselection counts in
-`pytest --collect-only` output.
+Each YAML entry exposes all six test methods on `TestBasic`: the five `kind`
+defaults listed below, plus `test_fast_update_diff`, which an entry opts into
+through `test_function`. Only the method matching its `test_function` is
+parametrized. The plugin deselects the other five methods before the run, so
+only the method bound to that YAML entry remains selected. This also explains
+the deselection counts in `pytest --collect-only` output.
 
 ## Dispatch: `kind`, `test_function`, and parametrization
 

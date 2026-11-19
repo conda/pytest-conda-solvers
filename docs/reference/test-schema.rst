@@ -6,7 +6,7 @@ JSON Schema for Conda Solver Tests
 This page documents the schema for the declarative YAML test files consumed
 by pytest-conda-solvers. Each test file deserialises into a
 :class:`~pytest_conda_solvers.models.TestModule` containing an ordered list
-of test specs. Four test kinds are supported, each represented by a distinct
+of test specs. Five test kinds are supported, each represented by a distinct
 class and selected via the ``kind`` discriminator field.
 
 Top-level container
@@ -27,7 +27,7 @@ Test specs
 ----------
 
 Each element of :attr:`~pytest_conda_solvers.models.TestModule.tests` is one
-of the four spec types below, identified by its ``kind`` field.
+of the five spec types below, identified by its ``kind`` field.
 
 .. autoclass:: pytest_conda_solvers.models.SolveTestSpec
    :members:

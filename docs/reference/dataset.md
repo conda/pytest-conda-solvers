@@ -5,7 +5,7 @@ Conda solver tests are written as YAML files. See the
 and examples.
 
 Each file contains a top-level `tests` key with a list of test cases. Each test
-case covers one of four solver operations. All test cases include identifying
+case covers one of five solver operations. All test cases include identifying
 information and solver input, such as channels and the initial prefix state.
 Each test type adds its own expected result, such as a final solution or an
 error.
@@ -16,9 +16,8 @@ All tests share a `name`, a unique `id`, `provenance` information linking the
 test back to its upstream source, and a `kind` discriminator selecting one of
 the five test types: `solve`, `solve_for_diff`, `unsatisfiable`,
 `determine_constricting_specs`, or `get_constrained_packages`. Each test also
-has an `input` describing the
-solver inputs, such as the packages and channels involved and the prior state
-of the environment.
+has an `input` describing the solver inputs, such as the packages and channels
+involved and the prior state of the environment.
 
 For complete field definitions and examples, see the [test schema](test-schema).
 The JSON Schema is generated from the project models, and CI checks the
