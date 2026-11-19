@@ -43,8 +43,9 @@ Pick the `kind` that matches what the upstream test actually asserts:
 | `unsatisfiable` | the solver raises an error |
 
 For `unsatisfiable`, also pick the `error` type
-(`UnsatisfiableError`, `ResolvePackageNotFound`, `PackagesNotFoundError`, or
-`SpecsConfigurationConflictError`) matching the exception upstream expects —
+(`UnsatisfiableError`, `ResolvePackageNotFound`, `PackagesNotFoundError`,
+`SpecsConfigurationConflictError`, or `NoChannelsConfiguredError`) matching
+the exception upstream expects —
 see the "Errors" section of the [test schema](../reference/test-schema) for the shape of
 each. Classic and
 libmamba sometimes raise *different* exceptions or messages for the same

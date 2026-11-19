@@ -76,7 +76,7 @@ the SAT run and the records in the index. Example (S010):
 
 An ``unsatisfiable`` test asserts that the solver raises a specific error.
 The ``error`` field is a discriminated union — see the `Errors`_ section for
-all four error types. Example with ``UnsatisfiableError`` (B005):
+all five error types. Example with ``UnsatisfiableError`` (B005):
 
 .. literalinclude:: /examples/unsatisfiable_unsatisfiable_error.yaml
    :language: yaml
@@ -94,6 +94,11 @@ Example with ``PackagesNotFoundError`` (B007b):
 Example with ``SpecsConfigurationConflictError`` (I004):
 
 .. literalinclude:: /examples/unsatisfiable_specs_configuration_conflict.yaml
+   :language: yaml
+
+Example with ``NoChannelsConfiguredError`` (B185):
+
+.. literalinclude:: /examples/unsatisfiable_no_channels_configured.yaml
    :language: yaml
 
 
@@ -174,7 +179,7 @@ Errors
 
 The :attr:`~pytest_conda_solvers.models.UnsatisfiableTestSpec.error` field of
 :class:`~pytest_conda_solvers.models.UnsatisfiableTestSpec` is a discriminated
-union of the four error types below, identified by the ``exception`` field.
+union of the five error types below, identified by the ``exception`` field.
 
 .. autoclass:: pytest_conda_solvers.models.UnsatisfiableTestError
    :members:
@@ -208,6 +213,13 @@ specific conflict chain is being asserted:
    :undoc-members:
 
 .. literalinclude:: /examples/error_specs_configuration_conflict.yaml
+   :language: yaml
+
+.. autoclass:: pytest_conda_solvers.models.NoChannelsConfiguredTestError
+   :members:
+   :undoc-members:
+
+.. literalinclude:: /examples/error_no_channels_configured.yaml
    :language: yaml
 
 

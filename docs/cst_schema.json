@@ -1571,6 +1571,7 @@
     },
     "NoChannelsConfiguredTestError": {
       "title": "NoChannelsConfiguredTestError",
+      "description": "Expected error for a test where the solver should raise ``NoChannelsConfiguredError``.\n\nThis error occurs when a solve is requested with no channels configured.\nThe ``exception`` discriminator field is always\n``\"NoChannelsConfiguredError\"`` and is set automatically.",
       "type": "object",
       "properties": {
         "exception": {

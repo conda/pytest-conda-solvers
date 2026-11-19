@@ -436,7 +436,17 @@ class NoChannelsConfiguredTestError(
     frozen=True,
     forbid_unknown_fields=True,
 ):
+    """Expected error for a test where the solver should raise ``NoChannelsConfiguredError``.
+
+    This error occurs when a solve is requested with no channels configured.
+    The ``exception`` discriminator field is always
+    ``"NoChannelsConfiguredError"`` and is set automatically.
+    """
+
     message_includes: str | list[str] = []
+    """Substring(s) that must appear in the raised exception's message.
+    May be a single string or a list of strings. Defaults to an empty list
+    (no inclusion checks)."""
 
 
 class SpecsConfigurationConflictTestError(
@@ -800,8 +810,9 @@ class UnsatisfiableTestSpec(
     """The expected error the solver should raise. Must be one of
     :class:`UnsatisfiableTestError`,
     :class:`ResolvePackageNotFoundTestError`,
-    :class:`PackagesNotFoundTestError`, or
-    :class:`SpecsConfigurationConflictTestError`, discriminated by the
+    :class:`PackagesNotFoundTestError`,
+    :class:`SpecsConfigurationConflictTestError`, or
+    :class:`NoChannelsConfiguredTestError`, discriminated by the
     ``exception`` field."""
 
     description: str | None = None

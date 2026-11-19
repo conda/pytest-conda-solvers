@@ -23,5 +23,5 @@ reporting — not just of the final decision to fail — is part of what this
 plugin exists to verify (see [Motivation](motivation)). See
 [Adding a test](../how-to/adding-a-test) for the general convention of
 documenting this kind of strengthening in a case's `description` field, and
-the [test schema](../reference/test-schema) for the full shape of the four
+the [test schema](../reference/test-schema) for the full shape of the five
 error types.
