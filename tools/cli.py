@@ -28,7 +28,17 @@ FIXTURES_DIR = Path("pytest_conda_solvers/conda-solver-tests")
 # The fixture IDs used to build the generated documentation examples. If any
 # of these are ever renamed or removed from the fixtures, ``generate_examples``
 # must fail loudly rather than silently producing stale/placeholder output.
-FIXTURE_IDS = ("B001", "B005", "B007", "B007b", "B034", "S001", "I004")
+FIXTURE_IDS = (
+    "B001",
+    "B005",
+    "B007",
+    "B007b",
+    "B034",
+    "B185",
+    "S001",
+    "S010",
+    "I004",
+)
 
 
 @app.command()
@@ -175,7 +185,7 @@ def generate_examples(output_dir: Path | None = None):
             "FIXTURE_IDS and the examples in generate_examples() to match."
         )
 
-    b001, b005, b007, b007b, b034, s001, i004 = (
+    b001, b005, b007, b007b, b034, b185, s001, s010, i004 = (
         fixture_specs[id_] for id_ in FIXTURE_IDS
     )
 
@@ -188,6 +198,12 @@ def generate_examples(output_dir: Path | None = None):
         "determine_constricting_specs.yaml",
         s001,
         type(s001),
+    )
+    _emit(
+        output_dir,
+        "get_constrained_packages.yaml",
+        s010,
+        type(s010),
     )
     _emit(
         output_dir,
@@ -212,6 +228,12 @@ def generate_examples(output_dir: Path | None = None):
         "unsatisfiable_specs_configuration_conflict.yaml",
         i004,
         type(i004),
+    )
+    _emit(
+        output_dir,
+        "unsatisfiable_no_channels_configured.yaml",
+        b185,
+        type(b185),
     )
 
     # -- Field-shape snippets (real fixtures where possible) ------------
@@ -250,6 +272,12 @@ def generate_examples(output_dir: Path | None = None):
         s001.output,
         type(s001.output),
     )
+    _emit(
+        output_dir,
+        "constrained_packages_output.yaml",
+        s010.output,
+        type(s010.output),
+    )
 
     _emit(output_dir, "error_unsatisfiable.yaml", b005.error, type(b005.error))
     _emit(
@@ -275,6 +303,12 @@ def generate_examples(output_dir: Path | None = None):
         "error_specs_configuration_conflict.yaml",
         i004.error,
         type(i004.error),
+    )
+    _emit(
+        output_dir,
+        "error_no_channels_configured.yaml",
+        b185.error,
+        type(b185.error),
     )
 
     _emit(output_dir, "provenance.yaml", b001.provenance, Provenance)

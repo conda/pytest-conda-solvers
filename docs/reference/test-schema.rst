@@ -6,7 +6,7 @@ JSON Schema for Conda Solver Tests
 This page documents the schema for the declarative YAML test files consumed
 by pytest-conda-solvers. Each test file deserialises into a
 :class:`~pytest_conda_solvers.models.TestModule` containing an ordered list
-of test specs. Four test kinds are supported, each represented by a distinct
+of test specs. Five test kinds are supported, each represented by a distinct
 class and selected via the ``kind`` discriminator field.
 
 Top-level container
@@ -27,7 +27,7 @@ Test specs
 ----------
 
 Each element of :attr:`~pytest_conda_solvers.models.TestModule.tests` is one
-of the four spec types below, identified by its ``kind`` field.
+of the five spec types below, identified by its ``kind`` field.
 
 .. autoclass:: pytest_conda_solvers.models.SolveTestSpec
    :members:
@@ -59,13 +59,24 @@ blocking a requested installation or upgrade. Example (S001):
 .. literalinclude:: /examples/determine_constricting_specs.yaml
    :language: yaml
 
+.. autoclass:: pytest_conda_solvers.models.GetConstrainedPackagesTestSpec
+   :members:
+   :undoc-members:
+
+A ``get_constrained_packages`` test asserts which requested packages the
+solver reports as constrained, given the requested packages before and after
+the SAT run and the records in the index. Example (S010):
+
+.. literalinclude:: /examples/get_constrained_packages.yaml
+   :language: yaml
+
 .. autoclass:: pytest_conda_solvers.models.UnsatisfiableTestSpec
    :members:
    :undoc-members:
 
 An ``unsatisfiable`` test asserts that the solver raises a specific error.
 The ``error`` field is a discriminated union — see the `Errors`_ section for
-all four error types. Example with ``UnsatisfiableError`` (B005):
+all five error types. Example with ``UnsatisfiableError`` (B005):
 
 .. literalinclude:: /examples/unsatisfiable_unsatisfiable_error.yaml
    :language: yaml
@@ -83,6 +94,11 @@ Example with ``PackagesNotFoundError`` (B007b):
 Example with ``SpecsConfigurationConflictError`` (I004):
 
 .. literalinclude:: /examples/unsatisfiable_specs_configuration_conflict.yaml
+   :language: yaml
+
+Example with ``NoChannelsConfiguredError`` (B185):
+
+.. literalinclude:: /examples/unsatisfiable_no_channels_configured.yaml
    :language: yaml
 
 
@@ -108,7 +124,7 @@ A more complete input showing prefix pre-population and solver modifiers:
    :members:
    :undoc-members:
 
-A ``PrefixRecord`` in ``solution_records`` looks like:
+A ``PrefixRecord`` in ``solution_records`` or ``index_records`` looks like:
 
 .. literalinclude:: /examples/prefix_record.yaml
    :language: yaml
@@ -150,13 +166,20 @@ When constrictions are present:
    :members:
    :undoc-members:
 
+.. autoclass:: pytest_conda_solvers.models.ConstrainedPackagesTestOutput
+   :members:
+   :undoc-members:
+
+.. literalinclude:: /examples/constrained_packages_output.yaml
+   :language: yaml
+
 
 Errors
 ------
 
 The :attr:`~pytest_conda_solvers.models.UnsatisfiableTestSpec.error` field of
 :class:`~pytest_conda_solvers.models.UnsatisfiableTestSpec` is a discriminated
-union of the four error types below, identified by the ``exception`` field.
+union of the five error types below, identified by the ``exception`` field.
 
 .. autoclass:: pytest_conda_solvers.models.UnsatisfiableTestError
    :members:
@@ -190,6 +213,13 @@ specific conflict chain is being asserted:
    :undoc-members:
 
 .. literalinclude:: /examples/error_specs_configuration_conflict.yaml
+   :language: yaml
+
+.. autoclass:: pytest_conda_solvers.models.NoChannelsConfiguredTestError
+   :members:
+   :undoc-members:
+
+.. literalinclude:: /examples/error_no_channels_configured.yaml
    :language: yaml
 
 

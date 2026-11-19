@@ -50,11 +50,12 @@ an unknown field inside an entry raises a decode error during collection.
 The top-level `TestModule` still accepts extra fields. See the
 [test schema](../reference/test-schema) for the fields each model accepts.
 
-Each YAML entry exposes all four methods on `TestBasic`. Only the method
-matching its `test_function` is parametrized. The plugin deselects the other
-three methods before the run, so only the method bound to that YAML entry
-remains selected. This also explains the deselection counts in
-`pytest --collect-only` output.
+Each YAML entry exposes all six test methods on `TestBasic`: the five `kind`
+defaults listed below, plus `test_fast_update_diff`, which an entry opts into
+through `test_function`. Only the method matching its `test_function` is
+parametrized. The plugin deselects the other five methods before the run, so
+only the method bound to that YAML entry remains selected. This also explains
+the deselection counts in `pytest --collect-only` output.
 
 ## Dispatch: `kind`, `test_function`, and parametrization
 
@@ -66,13 +67,14 @@ default `test_function`:
 | `solve` | `test_solve` |
 | `solve_for_diff` | `test_solve_for_diff` |
 | `determine_constricting_specs` | `test_determine_constricting_specs` |
+| `get_constrained_packages` | `test_get_constrained_packages` |
 | `unsatisfiable` | `test_unsatisfiable` |
 
 `test_function` can be overridden per-entry, though in practice it rarely
 needs to be — it exists so an entry could point at a different method than
 its `kind`'s default.
 
-The four methods named above live on a single `TestBasic` class and are each
+The five methods named above live on a single `TestBasic` class and are each
 marked `@pytest.mark.conda_solver_test`. During test generation,
 `pytest_generate_tests` matches a marked method's name against the current
 entry's `test_function`, and when they match, parametrizes that method's
