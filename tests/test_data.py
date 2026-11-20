@@ -1,3 +1,5 @@
+import pytest
+
 from pytest_conda_solvers import data
 
 
@@ -26,3 +28,21 @@ def test_load_data_file():
         "version": "1.7.0rc1",
     }
     assert index[random_entry_key] == random_entry_value
+
+
+@pytest.mark.parametrize("filename", ["repodata.json", "current_repodata.json"])
+def test_get_channel_repodata(filename):
+    repodata = data.get_channel_repodata("channel-1", "linux-64", filename)
+    assert repodata["info"] == {
+        "subdir": "linux-64",
+        "arch": "x86_64",
+        "platform": "linux",
+    }
+    assert "numpy-1.7.0rc1-py33_p0.tar.bz2" in repodata["packages"]
+
+
+def test_get_channel_repodata_rejects_unsupported_filename():
+    with pytest.raises(
+        ValueError, match=r"Unsupported repodata filename 'repodata\.json\.zst'"
+    ):
+        data.get_channel_repodata("channel-1", "linux-64", "repodata.json.zst")
