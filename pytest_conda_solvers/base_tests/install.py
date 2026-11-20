@@ -618,7 +618,7 @@ class TestBasic:
 
     @pytest.mark.conda_solver_test
     def test_get_constrained_packages(
-        self, env, tmpdir, solver_backend, test, channel_server
+        self, request, env, tmpdir, solver_backend, test, channel_server
     ):
         def as_pairs(mapping):
             # upstream keys each list by the requested name and pairs every
@@ -637,6 +637,7 @@ class TestBasic:
             channel_server,
             tmpdir,
             test.input,
+            request.config.option.conda_solver,
         ) as (solver, *_):
             constrained = solver.get_constrained_packages(
                 as_pairs(test.input.pre_packages),
