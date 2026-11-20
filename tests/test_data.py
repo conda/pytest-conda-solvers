@@ -1,4 +1,9 @@
 import pytest
+from constants import (
+    EXPORTED_CHANNELS_WITH_FEATURES,
+    SUBDIR,
+    UNEXPORTED_CHANNELS_WITH_FEATURES,
+)
 
 from pytest_conda_solvers import data
 
@@ -48,19 +53,16 @@ def test_get_channel_repodata_rejects_unsupported_filename():
         data.get_channel_repodata("channel-1", "linux-64", "repodata.json.zst")
 
 
-def test_exported_channels_expose_features_as_track_features():
-    raw = data.get_channel_repodata("channel-1", "linux-64", "repodata.json")
+@pytest.mark.parametrize("channel", EXPORTED_CHANNELS_WITH_FEATURES)
+def test_exported_channels_expose_features_as_track_features(channel):
+    raw = data.get_channel_repodata(channel, SUBDIR, "repodata.json")
     exported = data.get_channel_repodata(
-        "channel-1", "linux-64", "repodata.json", features_as_track_features=True
+        channel, SUBDIR, "repodata.json", features_as_track_features=True
     )
     raw_packages, exported_packages = raw["packages"], exported["packages"]
     assert set(exported_packages) == set(raw_packages)
-    mkl_numpy = "numpy-1.7.0rc1-py33_p0.tar.bz2"
-    assert raw_packages[mkl_numpy]["features"] == "mkl"
-    assert "features" not in exported_packages[mkl_numpy]
-    assert exported_packages[mkl_numpy]["track_features"] == "mkl"
     with_features = {fn for fn, meta in raw_packages.items() if "features" in meta}
-    assert mkl_numpy in with_features
+    assert with_features
     for fn in with_features:
         assert "features" not in exported_packages[fn]
         assert exported_packages[fn]["track_features"] == raw_packages[fn]["features"]
@@ -77,11 +79,11 @@ def test_exported_channels_expose_features_as_track_features():
         assert exported_packages[fn] == raw_packages[fn]
 
 
-def test_simple_environment_channels_keep_features():
-    assert "channel-10" not in data.EXPORTED_CHANNELS
-    raw = data.get_channel_repodata("channel-10", "linux-64", "repodata.json")
+@pytest.mark.parametrize("channel", UNEXPORTED_CHANNELS_WITH_FEATURES)
+def test_unexported_channels_keep_features(channel):
+    raw = data.get_channel_repodata(channel, SUBDIR, "repodata.json")
     exported = data.get_channel_repodata(
-        "channel-10", "linux-64", "repodata.json", features_as_track_features=True
+        channel, SUBDIR, "repodata.json", features_as_track_features=True
     )
     assert any("features" in meta for meta in raw["packages"].values())
     assert exported["packages"] == raw["packages"]
