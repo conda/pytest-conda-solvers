@@ -19,13 +19,13 @@ happens to live in a test directory for unrelated reasons — decodes to
 something else, raises `msgspec.DecodeError`, or is simply skipped, so it's
 left for other collectors.
 
-The bundled suite under `pytest_conda_solvers/conda-solver-tests/` doesn't
-need to be passed on the command line: at session start, the plugin appends
-that directory to pytest's collection arguments, so it's always included
-alongside whatever paths you pass explicitly. `--no-bundled-solver-tests`
-turns this off, which is useful for running only your own custom YAML or
-Python tests without the shipped dataset — those custom files still go
-through the same `tests:`-list detection if they're `.yaml`.
+The bundled suite under `pytest_conda_solvers/conda-solver-tests/` is an
+ordinary directory of test files to pytest: `--pyargs pytest_conda_solvers`
+collects it from the installed package, and in a checkout the rootdir
+already covers it. The plugin itself adds nothing to collection, so it can
+sit installed in an environment without affecting other projects' test runs.
+Custom YAML files go through the same `tests:`-list check as the bundled
+ones.
 
 Once a file is claimed, collection proceeds in three steps:
 
@@ -129,23 +129,20 @@ A few fixtures do the real work behind each test method:
 
 ## Running the shipped dataset
 
-The most direct way to run everything is plain pytest with a solver
-selected — the bundled suite is collected automatically:
+The simplest way to run everything is `--pyargs` for the installed package
+plus a solver:
 
 ```bash
-pytest --conda-solver=classic
-pytest --conda-solver=libmamba
+pytest --pyargs pytest_conda_solvers --conda-solver=classic
+pytest --pyargs pytest_conda_solvers --conda-solver=libmamba
 ```
 
 The pixi tasks `pixi run test-classic-solver` and
 `pixi run test-libmamba-solver` also run the bundled suite this way, but
-they point at `tests/test_provenance.py` explicitly — that file is a
-separate meta-test suite that validates dataset invariants (unique names/
-ids, provenance links resolving against GitHub), not part of the harness
+they also point at `tests/test_provenance.py` — that file is a separate
+meta-test suite that validates dataset invariants (unique names/ids,
+provenance links resolving against GitHub), not part of the harness
 described on this page.
-
-To run only tests you pass explicitly, without the bundled dataset, add
-`--no-bundled-solver-tests`.
 
 See the [Quick start](../quickstart) for a first run end-to-end, and
 [Adding a test](../how-to/adding-a-test) for using `-k <name>` to iterate on

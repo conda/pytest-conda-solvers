@@ -15,7 +15,6 @@ from pytest import (
 )
 
 from .models import TestModule
-from .paths import solver_tests_path
 
 initialize_logging()
 
@@ -25,11 +24,6 @@ pytest_plugins = "pytest_conda_solvers.fixtures"
 def pytest_addoption(parser: Parser, pluginmanager: PytestPluginManager) -> None:
     group = parser.getgroup("conda_solver")
     group.addoption("--conda-solver", default="libmamba")
-    group.addoption(
-        "--no-bundled-solver-tests",
-        action="store_true",
-        help="Do not collect the bundled conda solver test suite.",
-    )
 
 
 def pytest_configure(config: Config) -> None:
@@ -43,22 +37,8 @@ def pytest_configure(config: Config) -> None:
     )
 
 
-def pytest_sessionstart(session: Session) -> None:
-    """Add the bundled suite after pytest resolves its normal collection paths."""
-    if session.config.getoption("no_bundled_solver_tests"):
-        return
-
-    tests_path = str(solver_tests_path())
-    if tests_path not in session.config.args:
-        session.config.args.append(tests_path)
-
-
 def pytest_collect_file(parent, file_path):
     if file_path.suffix != ".yaml":
-        return None
-    if parent.config.getoption("no_bundled_solver_tests") and (
-        file_path.resolve().is_relative_to(solver_tests_path().resolve())
-    ):
         return None
     if _is_solver_test_file(file_path):
         return CondaSolverYamlFile.from_parent(parent, path=file_path)

@@ -1,7 +1,5 @@
 import pytest
 
-from pytest_conda_solvers import solver_tests_path
-
 PLUGIN_ARGS = (
     "-p",
     "no:conda-solvers",
@@ -9,8 +7,24 @@ PLUGIN_ARGS = (
     "pytest_conda_solvers.plugin",
 )
 
+CUSTOM_YAML = """
+    tests:
+      - name: local solver test
+        id: LOCAL001
+        provenance:
+          node_id: tests/test_local.py::test_local
+          commit: "0000000000000000000000000000000000000000"
+          url: https://example.invalid/test
+        kind: solve
+        input:
+          channels: channel-1
+          specs_to_add: numpy
+        output:
+          final_state: []
+"""
 
-def test_bundled_suite_preserves_configured_testpaths(pytester):
+
+def test_bundled_suite_is_not_collected_in_other_projects(pytester):
     pytester.makeini("""
         [pytest]
         testpaths = configured
@@ -23,50 +37,35 @@ def test_bundled_suite_preserves_configured_testpaths(pytester):
     assert result.ret == pytest.ExitCode.OK
     output = result.stdout.str()
     assert "configured/test_local.py::test_local" in output
-    assert "basic.yaml::solve_1_1::test_solve[solve_1_1]" in output
+    assert "basic.yaml" not in output
+    assert "1 test collected" in output
 
 
-def test_bundled_suite_can_be_disabled_without_disabling_custom_yaml(pytester):
-    pytester.makepyfile("""
-        def test_local():
-            pass
-    """)
-    pytester.makefile(
-        ".yaml",
-        custom="""
-            tests:
-              - name: local solver test
-                id: LOCAL001
-                provenance:
-                  node_id: tests/test_local.py::test_local
-                  commit: "0000000000000000000000000000000000000000"
-                  url: https://example.invalid/test
-                kind: solve
-                input:
-                  channels: channel-1
-                  specs_to_add: numpy
-                output:
-                  final_state: []
-        """,
-    )
-
+def test_bundled_suite_is_collected_with_pyargs(pytester):
     result = pytester.runpytest(
-        *PLUGIN_ARGS,
-        "--collect-only",
-        "-q",
-        "--no-bundled-solver-tests",
-        ".",
-        str(solver_tests_path()),
+        *PLUGIN_ARGS, "--collect-only", "-q", "--pyargs", "pytest_conda_solvers"
     )
 
     assert result.ret == pytest.ExitCode.OK
     output = result.stdout.str()
-    assert (
-        "test_bundled_suite_can_be_disabled_without_disabling_custom_yaml.py::test_local"
-        in output
-    )
+    assert "basic.yaml::solve_1_1::test_solve[solve_1_1]" in output
+    assert "test_solve_regressions.py::" in output
+
+
+def test_custom_yaml_is_collected_next_to_python_tests(pytester):
+    pytester.makepyfile("""
+        def test_local():
+            pass
+    """)
+    pytester.makefile(".yaml", custom=CUSTOM_YAML)
+
+    result = pytester.runpytest(*PLUGIN_ARGS, "--collect-only", "-q")
+
+    assert result.ret == pytest.ExitCode.OK
+    output = result.stdout.str()
+    assert "test_custom_yaml_is_collected_next_to_python_tests.py::test_local" in output
     assert "custom.yaml::local_solver_test::test_solve[local_solver_test]" in output
-    assert "basic.yaml::solve_1_1::test_solve[solve_1_1]" not in output
+    assert "basic.yaml" not in output
 
 
 def test_unrelated_yaml_is_ignored(pytester):
@@ -83,9 +82,7 @@ def test_unrelated_yaml_is_ignored(pytester):
         """,
     )
 
-    result = pytester.runpytest(
-        *PLUGIN_ARGS, "--collect-only", "-q", "--no-bundled-solver-tests"
-    )
+    result = pytester.runpytest(*PLUGIN_ARGS, "--collect-only", "-q")
 
     assert result.ret == pytest.ExitCode.OK
     output = result.stdout.str()
@@ -102,9 +99,7 @@ def test_invalid_solver_yaml_still_reports_a_collection_error(pytester):
         """,
     )
 
-    result = pytester.runpytest(
-        *PLUGIN_ARGS, "--collect-only", "-q", "--no-bundled-solver-tests"
-    )
+    result = pytester.runpytest(*PLUGIN_ARGS, "--collect-only", "-q")
 
     assert result.ret == pytest.ExitCode.INTERRUPTED
     result.stdout.fnmatch_lines(["*invalid.yaml*Object missing required field*"])
