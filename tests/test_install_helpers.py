@@ -133,7 +133,7 @@ def test_specs_configuration_conflict_rejects_nested_specs(field):
     ],
 )
 def test_determine_constricting_specs_accepts_model_values(
-    solution_records, expected_names
+    request, solution_records, expected_names
 ):
     test = SimpleNamespace(
         input=_TestInput(specs_to_add="numpy", solution_records=solution_records),
@@ -150,9 +150,6 @@ def test_determine_constricting_specs_accepts_model_values(
         )
     )
     runner = _TestBasic()
-    request = SimpleNamespace(
-        config=SimpleNamespace(option=SimpleNamespace(conda_solver="classic"))
-    )
 
     with patch.object(runner, "_setup_solver", return_value=setup):
         runner.test_determine_constricting_specs(request, None, None, None, test, None)
@@ -166,7 +163,9 @@ def test_determine_constricting_specs_accepts_model_values(
     ("post_version", "constrained"),
     [("0.1.1", []), ("0.1.0", ["mypkg"])],
 )
-def test_get_constrained_packages_passes_model_values(post_version, constrained):
+def test_get_constrained_packages_passes_model_values(
+    request, post_version, constrained
+):
     record = PrefixRecord(
         name="mypkg",
         version="0.1.1",
@@ -198,7 +197,7 @@ def test_get_constrained_packages_passes_model_values(post_version, constrained)
     runner = _TestBasic()
 
     with patch.object(runner, "_setup_solver", return_value=setup):
-        runner.test_get_constrained_packages(None, None, None, test, None)
+        runner.test_get_constrained_packages(request, None, None, None, test, None)
 
     pre, post, index = solver.get_constrained_packages.call_args.args
     assert pre == {"mypkg": [("mypkg", "0.1.0")]}
@@ -216,7 +215,7 @@ def test_get_constrained_packages_passes_model_values(post_version, constrained)
         (["python", "zlib", "xz"], False),
     ],
 )
-def test_solve_names_check_compares_name_sets(names, passes):
+def test_solve_names_check_compares_name_sets(request, names, passes):
     solved = [
         SimpleNamespace(name="zlib", dist_str=lambda: "c/linux-64::zlib-1.2.11-0"),
         SimpleNamespace(name="python", dist_str=lambda: "c/linux-64::python-3.6-0"),
@@ -237,7 +236,7 @@ def test_solve_names_check_compares_name_sets(names, passes):
         ),
         nullcontext() if passes else pytest.raises(AssertionError),
     ):
-        runner.test_solve(None, None, None, test, channel_server)
+        runner.test_solve(request, None, None, None, test, channel_server)
 
 
 @pytest.mark.parametrize("solver_name", ["classic", "libmamba", "rattler"])
