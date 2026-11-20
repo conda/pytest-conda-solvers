@@ -30,21 +30,6 @@ messages differently (rattler may omit the requested package entirely), so
 for them only the explicit `message_includes`/`message_excludes` fields
 apply, matching upstream's type-only check.
 
-## Solver applicability under rattler
-
-conda-rattler-solver skips the feature-dependent tests of conda's shared
-SolverTests suite ("conda-rattler-solver does not support features", see
-https://github.com/conda/conda-rattler-solver/blob/main/tests/test_solver.py).
-Those tests are already restricted to the classic solver in this suite, so
-they are skipped under `--conda-solver=rattler` automatically. Known rattler
-limitations beyond that (flexible channel priority) are carried as strict
-per-entry `xfail_solvers: rattler` marks, so CI notices when an upstream fix
-lands.
-
-Upstream exports its index fixtures (channel-1, channel-2, channel-4,
-channel-5, and channel-freeze here) to disk for every solver but classic,
-exposing each record's `features` as `track_features`. The channel server
-mirrors that with a parallel `/track-features` route, which the harness uses
 ## Solver applicability
 
 conda-rattler-solver skips the feature-dependent tests of conda's shared
