@@ -45,7 +45,26 @@ Upstream exports its index fixtures (channel-1, channel-2, channel-4,
 channel-5, and channel-freeze here) to disk for every solver but classic,
 exposing each record's `features` as `track_features`. The channel server
 mirrors that with a parallel `/track-features` route, which the harness uses
-for every solver but classic.
+## Solver applicability
+
+conda-rattler-solver skips the feature-dependent tests of conda's shared
+SolverTests suite ("conda-rattler-solver does not support features", see
+https://github.com/conda/conda-rattler-solver/blob/main/tests/test_solver.py).
+Those tests are already restricted to the classic solver in this suite, so
+they are skipped under `--conda-solver=rattler`. Other rattler limitations,
+such as flexible channel priority, have a strict per-entry
+`xfail_solvers: rattler` mark, so CI notices when an upstream fix lands.
+
+Upstream writes its index fixtures (channel-1, channel-2, channel-4,
+channel-5, and channel-freeze here) to disk for every solver except classic.
+In that copy, each record's `features` value moves to `track_features`. The
+channel server serves the same data through a `/track-features` route, which
+the harness uses for those solvers. The swap only helps solvers that already
+understand `track_features`, including libmamba and rattler. Feature support
+is unchanged, so tests that install feature packages, such as the
+`accelerate`/MKL stages `test_prune_1_1`, `test_update_prune_2_1`, and
+`test_update_prune_3_1` in `conda-solver-tests/basic.yaml`, keep their
+`xfail_solvers` marks for libmamba and rattler.
 
 ## Requirements
 
