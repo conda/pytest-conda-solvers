@@ -1,4 +1,12 @@
+"""
+Local test server based on uvicorn
+
+(Adapted from the http.server based one in the conda-index source tree,
+itself taken from the conda source tree)
+"""
+
 import mimetypes
+import queue
 import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -50,8 +58,11 @@ class NullCoder(Coder):
         return value
 
 
-@fixture(scope="session")
-def channel_server(host="localhost", port=8080):
+def run_test_server() -> uvicorn.Server:
+    """
+    Run a test server on a random port. Inspect returned server to get port,
+    shutdown etc.
+    """
     app = FastAPI(lifespan=lifespan)
 
     @app.get("/conda_format_repo/{full_path:path}")
@@ -112,15 +123,32 @@ def channel_server(host="localhost", port=8080):
     async def catch_all():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    thread = threading.Thread(
-        target=uvicorn.run,
-        args=(app,),
-        kwargs={
-            "host": host,
-            "port": port,
-        },
-        daemon=True,
-    )
-    thread.start()
+    def start_server(queue):
+        class Server(uvicorn.Server):
+            async def startup(self, sockets=None):
+                await super().startup(sockets)
+                queue.put(self)
 
+        try:
+            Server(uvicorn.Config(app, host="127.0.0.1", port=0)).run()
+        except SystemExit:
+            # uvicorn exits the thread when it cannot bind, and the caller's
+            # queue.get() times out
+            pass
+
+    started = queue.Queue()
+
+    threading.Thread(target=start_server, args=(started,), daemon=True).start()
+
+    return started.get(timeout=1)
+
+
+@fixture(scope="session")
+def channel_server():
+    """Open a local web server to test remote support files."""
+    http = run_test_server()
+    host, port = http.servers[0].sockets[0].getsockname()[:2]
     yield ChannelServer(host, port)
+    # shutdown is checked at a polling interval, or the daemon thread will shut
+    # down when the test suite exits.
+    http.should_exit = True
