@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `names` check on `final_state`, pinning the set of package names in a solution without fixing versions or builds
 - B187 to B189b, porting the record sets that conda's `tests/models/test_prefix_graph.py` builds on channel-4 and channel-5, and a `channel-5` entry in `TestChannel`
 
+### Changed
+
+- Prefix records built from dist strings carry all fields of the served record (`constrains`, `track_features`, `timestamp`, ...) in the index view of the solver under test, not just `depends` and `build_number`
+- B023 pins the stage-1 state of `test_channel_priority_churn_minimized` that B024a to B024c start from
+- C003 checks the `::__cuda==8.0=0` line of the classic error message
+
 ## 0.1.0 (2026-09-02)
 
 First public release of `pytest-conda-solvers`.
