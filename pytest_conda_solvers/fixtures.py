@@ -8,8 +8,12 @@ pytest_plugins = "pytest_conda_solvers.server"
 
 
 @pytest.fixture
-def solver_backend(request: FixtureRequest):
-    solver_name = request.config.option.conda_solver
+def solver_name(request: FixtureRequest) -> str:
+    return request.config.option.conda_solver
+
+
+@pytest.fixture
+def solver_backend(solver_name):
     yield context.plugin_manager.get_solver_backend(name=solver_name)
 
 

@@ -15,6 +15,8 @@ from pytest_conda_solvers.base_tests.install import (
 )
 from pytest_conda_solvers.base_tests.install import (
     add_base_url,
+    expected_base_url,
+    exports_features_as_track_features,
     get_solver,
     prepare_error_information,
 )
@@ -35,6 +37,7 @@ from pytest_conda_solvers.models import (
     TestModule as _TestModule,
 )
 from pytest_conda_solvers.paths import solver_tests_path
+from pytest_conda_solvers.server import ChannelServer
 
 
 @pytest.mark.parametrize("custom_first", [False, True])
@@ -210,7 +213,7 @@ def test_get_constrained_packages_passes_model_values(post_version, constrained)
         (["python", "zlib", "xz"], False),
     ],
 )
-def test_solve_names_check_compares_name_sets(names, passes):
+def test_solve_names_check_compares_name_sets(solver_name, names, passes):
     solved = [
         SimpleNamespace(name="zlib", dist_str=lambda: "c/linux-64::zlib-1.2.11-0"),
         SimpleNamespace(name="python", dist_str=lambda: "c/linux-64::python-3.6-0"),
@@ -231,7 +234,7 @@ def test_solve_names_check_compares_name_sets(names, passes):
         ),
         nullcontext() if passes else pytest.raises(AssertionError),
     ):
-        runner.test_solve(None, None, None, test, channel_server)
+        runner.test_solve(None, None, solver_name, test, channel_server)
 
 
 @pytest.mark.parametrize("solver_name", ["classic", "libmamba", "rattler"])
@@ -273,9 +276,6 @@ def test_fast_update_diff_checks(
     solver = Mock()
     solver.solve_for_diff.return_value = unlink, link
     setup = nullcontext((solver, {"prefix_records": [old_sqlite]}, {}, {}))
-    request = SimpleNamespace(
-        config=SimpleNamespace(option=SimpleNamespace(conda_solver=solver_name))
-    )
     channel_server = Mock()
     channel_server.get_base_url.return_value = "https://example.test"
     runner = _TestBasic()
@@ -286,4 +286,35 @@ def test_fast_update_diff_checks(
         else pytest.raises(AssertionError)
     )
     with patch.object(runner, "_setup_solver", return_value=setup), expected:
-        runner.test_fast_update_diff(request, None, None, None, test, channel_server)
+        runner.test_fast_update_diff(None, None, solver_name, test, channel_server)
+
+
+@pytest.mark.parametrize(
+    ("features_as_track_features", "expected"),
+    [
+        (False, "http://host:1234"),
+        (True, "http://host:1234/track-features"),
+    ],
+)
+def test_channel_server_base_url_selects_the_index_view(
+    features_as_track_features, expected
+):
+    server = ChannelServer("host", 1234)
+    assert server.get_base_url(features_as_track_features) == expected
+    assert (
+        server.get_channel_url("channel-1", features_as_track_features)
+        == f"{expected}/channel-1"
+    )
+
+
+@pytest.mark.parametrize(
+    ("solver_name", "exported"),
+    [("classic", False), ("libmamba", True), ("rattler", True)],
+)
+def test_expected_base_url_follows_the_solver(solver_name, exported):
+    assert exports_features_as_track_features(solver_name) is exported
+    server = ChannelServer("host", 1234)
+    expected = "http://host:1234"
+    if exported:
+        expected += "/track-features"
+    assert expected_base_url(server, solver_name) == expected
