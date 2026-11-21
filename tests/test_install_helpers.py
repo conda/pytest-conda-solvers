@@ -133,7 +133,7 @@ def test_specs_configuration_conflict_rejects_nested_specs(field):
     ],
 )
 def test_determine_constricting_specs_accepts_model_values(
-    request, solution_records, expected_names
+    solution_records, expected_names
 ):
     test = SimpleNamespace(
         input=_TestInput(specs_to_add="numpy", solution_records=solution_records),
@@ -152,7 +152,7 @@ def test_determine_constricting_specs_accepts_model_values(
     runner = _TestBasic()
 
     with patch.object(runner, "_setup_solver", return_value=setup):
-        runner.test_determine_constricting_specs(request, None, None, None, test, None)
+        runner.test_determine_constricting_specs(None, None, None, test, None)
 
     _, solution_records = solver.determine_constricting_specs.call_args.args
     assert all(isinstance(record, CondaPrefixRecord) for record in solution_records)
@@ -163,9 +163,7 @@ def test_determine_constricting_specs_accepts_model_values(
     ("post_version", "constrained"),
     [("0.1.1", []), ("0.1.0", ["mypkg"])],
 )
-def test_get_constrained_packages_passes_model_values(
-    request, post_version, constrained
-):
+def test_get_constrained_packages_passes_model_values(post_version, constrained):
     record = PrefixRecord(
         name="mypkg",
         version="0.1.1",
@@ -197,7 +195,7 @@ def test_get_constrained_packages_passes_model_values(
     runner = _TestBasic()
 
     with patch.object(runner, "_setup_solver", return_value=setup):
-        runner.test_get_constrained_packages(request, None, None, None, test, None)
+        runner.test_get_constrained_packages(None, None, None, test, None)
 
     pre, post, index = solver.get_constrained_packages.call_args.args
     assert pre == {"mypkg": [("mypkg", "0.1.0")]}
@@ -215,7 +213,7 @@ def test_get_constrained_packages_passes_model_values(
         (["python", "zlib", "xz"], False),
     ],
 )
-def test_solve_names_check_compares_name_sets(request, names, passes):
+def test_solve_names_check_compares_name_sets(solver_name, names, passes):
     solved = [
         SimpleNamespace(name="zlib", dist_str=lambda: "c/linux-64::zlib-1.2.11-0"),
         SimpleNamespace(name="python", dist_str=lambda: "c/linux-64::python-3.6-0"),
@@ -236,7 +234,7 @@ def test_solve_names_check_compares_name_sets(request, names, passes):
         ),
         nullcontext() if passes else pytest.raises(AssertionError),
     ):
-        runner.test_solve(request, None, None, None, test, channel_server)
+        runner.test_solve(None, None, solver_name, test, channel_server)
 
 
 @pytest.mark.parametrize("solver_name", ["classic", "libmamba", "rattler"])
@@ -278,9 +276,6 @@ def test_fast_update_diff_checks(
     solver = Mock()
     solver.solve_for_diff.return_value = unlink, link
     setup = nullcontext((solver, {"prefix_records": [old_sqlite]}, {}, {}))
-    request = SimpleNamespace(
-        config=SimpleNamespace(option=SimpleNamespace(conda_solver=solver_name))
-    )
     channel_server = Mock()
     channel_server.get_base_url.return_value = "https://example.test"
     runner = _TestBasic()
@@ -291,7 +286,7 @@ def test_fast_update_diff_checks(
         else pytest.raises(AssertionError)
     )
     with patch.object(runner, "_setup_solver", return_value=setup), expected:
-        runner.test_fast_update_diff(request, None, None, None, test, channel_server)
+        runner.test_fast_update_diff(None, None, solver_name, test, channel_server)
 
 
 @pytest.mark.parametrize(

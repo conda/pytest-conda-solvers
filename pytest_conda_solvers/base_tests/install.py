@@ -398,9 +398,8 @@ def expected_base_url(channel_server, solver_name: str):
 
 class TestBasic:
     @contextmanager
-    def _setup_solver(
-        self, solver_backend, channel_server, tmpdir, test_input, solver_name
-    ):
+    def _setup_solver(self, solver_name, channel_server, tmpdir, test_input):
+        solver_backend = context.plugin_manager.get_solver_backend(name=solver_name)
         solver_input, env, flags = prepare_solver_input(
             test_input,
             channel_server,
@@ -426,11 +425,8 @@ class TestBasic:
                     sys.prefix = saved_sys_prefix
 
     @pytest.mark.conda_solver_test
-    def test_solve(self, request, env, tmpdir, solver_backend, test, channel_server):
-        solver_name = request.config.option.conda_solver
-        with self._setup_solver(
-            solver_backend, channel_server, tmpdir, test.input, solver_name
-        ) as (
+    def test_solve(self, env, tmpdir, solver_name, test, channel_server):
+        with self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
             solver,
             _solver_input,
             _env,
@@ -514,17 +510,8 @@ class TestBasic:
             assert sorted(prec.name for prec in solved) == sorted(checks.names)
 
     @pytest.mark.conda_solver_test
-    def test_solve_for_diff(
-        self, request, env, tmpdir, solver_backend, test, channel_server
-    ):
-        solver_name = request.config.option.conda_solver
-        with self._setup_solver(
-            solver_backend,
-            channel_server,
-            tmpdir,
-            test.input,
-            solver_name,
-        ) as (
+    def test_solve_for_diff(self, env, tmpdir, solver_name, test, channel_server):
+        with self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
             solver,
             _solver_input,
             _env,
@@ -554,18 +541,13 @@ class TestBasic:
             assert list(convert_to_dist_str(link_precs)) == list(link_ref)
 
     @pytest.mark.conda_solver_test
-    def test_fast_update_diff(
-        self, request, env, tmpdir, solver_backend, test, channel_server
-    ):
-        solver_name = request.config.option.conda_solver
+    def test_fast_update_diff(self, env, tmpdir, solver_name, test, channel_server):
         if solver_name not in ("libmamba", "rattler"):
             return self.test_solve_for_diff(
-                request, env, tmpdir, solver_backend, test, channel_server
+                env, tmpdir, solver_name, test, channel_server
             )
 
-        with self._setup_solver(
-            solver_backend, channel_server, tmpdir, test.input, solver_name
-        ) as (
+        with self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
             solver,
             solver_input,
             _env,
@@ -592,19 +574,13 @@ class TestBasic:
 
     @pytest.mark.conda_solver_test
     def test_determine_constricting_specs(
-        self, request, env, tmpdir, solver_backend, test, channel_server
+        self, env, tmpdir, solver_name, test, channel_server
     ):
         solution_precs = [
             PrefixRecord.from_objects(record)
             for record in ensure_tuple(test.input.solution_records)
         ]
-        with self._setup_solver(
-            solver_backend,
-            channel_server,
-            tmpdir,
-            test.input,
-            request.config.option.conda_solver,
-        ) as (
+        with self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
             solver,
             solver_input,
             _env,
@@ -618,7 +594,7 @@ class TestBasic:
 
     @pytest.mark.conda_solver_test
     def test_get_constrained_packages(
-        self, request, env, tmpdir, solver_backend, test, channel_server
+        self, env, tmpdir, solver_name, test, channel_server
     ):
         def as_pairs(mapping):
             # upstream keys each list by the requested name and pairs every
@@ -632,13 +608,10 @@ class TestBasic:
             PrefixRecord.from_objects(record)
             for record in ensure_tuple(test.input.index_records)
         ]
-        with self._setup_solver(
-            solver_backend,
-            channel_server,
-            tmpdir,
-            test.input,
-            request.config.option.conda_solver,
-        ) as (solver, *_):
+        with self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
+            solver,
+            *_,
+        ):
             constrained = solver.get_constrained_packages(
                 as_pairs(test.input.pre_packages),
                 as_pairs(test.input.post_packages),
@@ -650,15 +623,10 @@ class TestBasic:
         )
 
     @pytest.mark.conda_solver_test
-    def test_unsatisfiable(
-        self, request, env, tmpdir, solver_backend, test, channel_server
-    ):
-        solver_name = request.config.option.conda_solver
+    def test_unsatisfiable(self, env, tmpdir, solver_name, test, channel_server):
         error_info = prepare_error_information(test.error, solver_name)
         with (
-            self._setup_solver(
-                solver_backend, channel_server, tmpdir, test.input, solver_name
-            ) as (
+            self._setup_solver(solver_name, channel_server, tmpdir, test.input) as (
                 solver,
                 _solver_input,
                 _env,
