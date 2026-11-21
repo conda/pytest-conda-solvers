@@ -46,7 +46,11 @@ SUBDIR_MAP = {
 @cache
 def get_channel_repodata(channel_name, subdir, filename, add_pip=False):
     # This currently does not offer the merge_noarch option
-    assert filename in ("repodata.json", "current_repodata.json")
+    if filename not in ("repodata.json", "current_repodata.json"):
+        raise ValueError(
+            f"Unsupported repodata filename {filename!r}, "
+            "expected 'repodata.json' or 'current_repodata.json'"
+        )
     info = {"subdir": subdir} | SUBDIR_MAP[subdir]
     source = "noarch" if subdir == "noarch" else "non-noarch"
     packages = load_data_file(Path(f"{channel_name}_{source}.json"))
