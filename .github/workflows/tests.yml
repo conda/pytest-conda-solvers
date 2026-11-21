@@ -95,8 +95,7 @@ jobs:
 
           pixi run -e conda-upstream \
           --manifest-path "$GITHUB_WORKSPACE/pyproject.toml" \
-          pytest $(cat ../ported_node_ids.txt) -vv \
-            --no-bundled-solver-tests
+          pytest $(cat ../ported_node_ids.txt) -vv
 
   test-python-minimum:
     name: Test on minimum supported Python (currently 3.11) / ${{ matrix.solver }} solver
