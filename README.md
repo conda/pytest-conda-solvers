@@ -30,25 +30,26 @@ messages differently (rattler may omit the requested package entirely), so
 for them only the explicit `message_includes`/`message_excludes` fields
 apply, matching upstream's type-only check.
 
-## Solver applicability under rattler
+## Solver applicability
 
 conda-rattler-solver skips the feature-dependent tests of conda's shared
 SolverTests suite ("conda-rattler-solver does not support features", see
 https://github.com/conda/conda-rattler-solver/blob/main/tests/test_solver.py).
 Those tests are already restricted to the classic solver in this suite, so
-they are skipped under `--conda-solver=rattler` automatically. Known rattler
-limitations beyond that (flexible channel priority) are carried as strict
-per-entry `xfail_solvers: rattler` marks, so CI notices when an upstream fix
-lands.
+they are skipped under `--conda-solver=rattler`. Other rattler limitations,
+such as flexible channel priority, have a strict per-entry
+`xfail_solvers: rattler` mark, so CI notices when an upstream fix lands.
 
-Tests with `add_pip: true` need no such marks. For them the channel server
-serves pip-injected repodata under a parallel `/with-pip` route, where every
-python 2.x/3.x record gains a pip dependency at index level, exactly like
-upstream's test fixtures. The injection therefore reaches solvers that read
-repodata directly, such as rattler, without relying on conda's
-add_pip_as_python_dependency setting at solve time. The route is a stopgap
-until conda-rattler-solver honours the setting itself, tracked in
-[conda-rattler-solver#122](https://github.com/conda/conda-rattler-solver/issues/122).
+Upstream writes its index fixtures (channel-1, channel-2, channel-4,
+channel-5, and channel-freeze here) to disk for every solver except classic.
+In that copy, each record's `features` value moves to `track_features`. The
+channel server serves the same data through a `/track-features` route, which
+the harness uses for those solvers. The swap only helps solvers that already
+understand `track_features`, including libmamba and rattler. Feature support
+is unchanged, so tests that install feature packages, such as the
+`accelerate`/MKL stages `test_prune_1_1`, `test_update_prune_2_1`, and
+`test_update_prune_3_1` in `conda-solver-tests/basic.yaml`, keep their
+`xfail_solvers` marks for libmamba and rattler.
 
 ## Requirements
 

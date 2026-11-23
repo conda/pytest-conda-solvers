@@ -1,4 +1,9 @@
 import pytest
+from constants import (
+    EXPORTED_CHANNELS_WITH_FEATURES,
+    SUBDIR,
+    UNEXPORTED_CHANNELS_WITH_FEATURES,
+)
 
 from pytest_conda_solvers import data
 
@@ -46,3 +51,39 @@ def test_get_channel_repodata_rejects_unsupported_filename():
         ValueError, match=r"Unsupported repodata filename 'repodata\.json\.zst'"
     ):
         data.get_channel_repodata("channel-1", "linux-64", "repodata.json.zst")
+
+
+@pytest.mark.parametrize("channel", EXPORTED_CHANNELS_WITH_FEATURES)
+def test_exported_channels_expose_features_as_track_features(channel):
+    raw = data.get_channel_repodata(channel, SUBDIR, "repodata.json")
+    exported = data.get_channel_repodata(
+        channel, SUBDIR, "repodata.json", features_as_track_features=True
+    )
+    raw_packages, exported_packages = raw["packages"], exported["packages"]
+    assert set(exported_packages) == set(raw_packages)
+    with_features = {fn for fn, meta in raw_packages.items() if "features" in meta}
+    assert with_features
+    for fn in with_features:
+        assert "features" not in exported_packages[fn]
+        assert exported_packages[fn]["track_features"] == raw_packages[fn]["features"]
+        assert {
+            key: value
+            for key, value in exported_packages[fn].items()
+            if key != "track_features"
+        } == {
+            key: value for key, value in raw_packages[fn].items() if key != "features"
+        }
+    untouched = set(raw_packages) - with_features
+    assert any("track_features" in raw_packages[fn] for fn in untouched)
+    for fn in untouched:
+        assert exported_packages[fn] == raw_packages[fn]
+
+
+@pytest.mark.parametrize("channel", UNEXPORTED_CHANNELS_WITH_FEATURES)
+def test_unexported_channels_keep_features(channel):
+    raw = data.get_channel_repodata(channel, SUBDIR, "repodata.json")
+    exported = data.get_channel_repodata(
+        channel, SUBDIR, "repodata.json", features_as_track_features=True
+    )
+    assert any("features" in meta for meta in raw["packages"].values())
+    assert exported["packages"] == raw["packages"]

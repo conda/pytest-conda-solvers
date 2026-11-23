@@ -93,7 +93,7 @@ on `input`/`output`/`error` are documented in the
 ## `--conda-solver` and per-test `solvers`/`xfail_solvers`
 
 `--conda-solver` selects which backend the whole run exercises (default
-`libmamba`). The `solver_backend` fixture resolves that name to a real
+`libmamba`). `_setup_solver` resolves that name to a real
 backend class through conda's own plugin manager, so the harness always
 solves against an actual registered backend, not a stub.
 
@@ -114,7 +114,7 @@ in this order:
 
 A few fixtures do the real work behind each test method:
 
-- `solver_backend` — resolves `--conda-solver` to a real backend class via
+- `solver_name` — the `--conda-solver` name, resolved to a backend class via
   conda's plugin manager, as described above.
 - `tmpdir` — provides the temporary prefix path for both solver backends.
   `get_solver()` injects installed records into `PrefixData` and uses HTTP
