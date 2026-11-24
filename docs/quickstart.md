@@ -19,11 +19,11 @@ automatically — there's nothing else to configure.
 
 ## Run the bundled suite
 
-Select a solver backend with `--conda-solver`. The suite of YAML tests
-shipped with the package is collected automatically:
+Point pytest at the YAML tests shipped in the package with `--pyargs` and
+pick a solver backend with `--conda-solver`:
 
 ```bash
-pytest --conda-solver=classic
+pytest --pyargs pytest_conda_solvers --conda-solver=classic
 ```
 
 You should see a few hundred tests pass, each one a solver scenario ported
@@ -31,7 +31,7 @@ from conda's own test suite (dependency resolution, updates, pinning,
 conflicts, and more). Run the same suite again against libmamba:
 
 ```bash
-pytest --conda-solver=libmamba
+pytest --pyargs pytest_conda_solvers --conda-solver=libmamba
 ```
 
 Some tests are restricted to one backend or the other — those show up as
@@ -43,7 +43,7 @@ Every test has a human-readable name that becomes its pytest ID. Use `-k` to
 run just one while you're exploring:
 
 ```bash
-pytest --conda-solver=classic -k solve_1_1
+pytest --pyargs pytest_conda_solvers --conda-solver=classic -k solve_1_1
 ```
 
 ## Look at what actually ran

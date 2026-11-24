@@ -74,18 +74,18 @@ pixi install
 
 ## Usage
 
-Select a solver with `--conda-solver`; the bundled suite is collected automatically:
+Point pytest at the suite shipped in the package with `--pyargs` and pick a
+solver with `--conda-solver`:
 
 ```bash
-pytest --conda-solver=libmamba
-pytest --conda-solver=classic
+pytest --pyargs pytest_conda_solvers --conda-solver=libmamba
+pytest --pyargs pytest_conda_solvers --conda-solver=classic
 ```
 
-Paths passed to pytest are collected alongside the bundled suite, so solver
-authors can add their own Python or YAML tests normally.
+From a checkout of this repository, a plain `pytest --conda-solver=...` works
+too.
 
-Use `--no-bundled-solver-tests` to collect custom tests without the suite
-shipped by this package.
+Installing the plugin adds no tests to a project on its own.
 
 From this repository with pixi:
 

@@ -7,6 +7,5 @@ def test_help_message(pytester):
         [
             "conda_solver:",
             "*--conda-solver=CONDA_SOLVER*",
-            "*--no-bundled-solver-tests*",
         ]
     )
